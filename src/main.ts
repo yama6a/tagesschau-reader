@@ -11,7 +11,7 @@ import {
   type Feed,
   type Story,
 } from './feed';
-import { clearRows, renderRows } from './list';
+import { clearRows, observeFit, renderRows } from './list';
 import { initModal, openArticle } from './modal';
 import { initOnboarding, openOnboarding } from './onboarding';
 import {
@@ -239,6 +239,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+observeFit(list);
 initModal(byId<HTMLDialogElement>('article'));
 initOnboarding(byId<HTMLDialogElement>('onboarding'), (saved) => {
   settings = saved;
