@@ -1,4 +1,4 @@
-import { el, icon, ICON_CHECK, ICON_UNDO } from './dom';
+import { el, formatRowDate, icon, ICON_CHECK, ICON_UNDO } from './dom';
 import type { Story } from './feed';
 import type { RowMode } from './readState';
 
@@ -10,6 +10,47 @@ export interface Entry {
 // Rows are kept by sophoraId, so a new render moves existing rows and their images stay loaded.
 // A row is built again when a refresh changes its text or its breaking news flag.
 const rows = new Map<string, HTMLElement>();
+// Rows whose title size is not set for the current width yet.
+const unfitted = new Set<HTMLElement>();
+
+// Title font size as a share of the normal size, from largest to smallest.
+export const FIT_STEPS = [1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7];
+
+// Lowers the title size until the text fits in the row. If 70% is still too big, the row grows.
+export function fitTitle(row: HTMLElement): void {
+  const body = row.querySelector<HTMLElement>('.body');
+  if (!body || body.clientHeight === 0) {
+    return;
+  }
+  delete row.dataset.grow;
+  for (const step of FIT_STEPS) {
+    row.style.setProperty('--fit', String(step));
+    if (body.scrollHeight <= body.clientHeight) {
+      return;
+    }
+  }
+  row.dataset.grow = '';
+}
+
+function fitRows(rowsToFit: Iterable<HTMLElement>): void {
+  for (const row of rowsToFit) {
+    if (row.isConnected && row.dataset.mode !== 'collapsed') {
+      fitTitle(row);
+    }
+  }
+}
+
+// Fits every row again when the list width changes or fonts finish loading.
+export function observeFit(container: HTMLElement): void {
+  let width = container.clientWidth;
+  new ResizeObserver(() => {
+    if (container.clientWidth !== width) {
+      width = container.clientWidth;
+      fitRows(rows.values());
+    }
+  }).observe(container);
+  void document.fonts?.ready.then(() => fitRows(rows.values()));
+}
 
 function buildRow(story: Story): HTMLElement {
   const variants = story.teaserImage?.imageVariants;
@@ -44,12 +85,22 @@ function buildRow(story: Story): HTMLElement {
     el('button', { class: 'show', type: 'button', 'data-action': 'toggle' }, 'Anzeigen'),
   );
 
-  return el('article', { class: 'row', 'data-id': story.sophoraId }, thumb, body);
+  return el(
+    'article',
+    { class: 'row', 'data-id': story.sophoraId },
+    thumb,
+    el('time', { class: 'date', datetime: story.date }, formatRowDate(story.date)),
+    body,
+  );
 }
 
 function updateRow(row: HTMLElement, mode: RowMode): void {
   if (row.dataset.mode === mode) {
     return;
+  }
+  const before = row.dataset.mode;
+  if (mode !== 'collapsed' && (before === undefined || before === 'collapsed')) {
+    unfitted.add(row);
   }
   row.dataset.mode = mode;
   const mark = row.querySelector<HTMLButtonElement>('.mark');
@@ -73,6 +124,7 @@ export function renderRows(container: HTMLElement, entries: Entry[]): void {
       row = buildRow(story);
       row.dataset.sig = sig;
       rows.set(story.sophoraId, row);
+      unfitted.add(row);
     }
     updateRow(row, mode);
     wanted.push(row);
@@ -92,9 +144,14 @@ export function renderRows(container: HTMLElement, entries: Entry[]): void {
     cursor.remove();
     cursor = next;
   }
+
+  // Fit after the rows are in the page, because fitting reads their size.
+  fitRows(unfitted);
+  unfitted.clear();
 }
 
 export function clearRows(container: HTMLElement): void {
   rows.clear();
+  unfitted.clear();
   container.replaceChildren();
 }

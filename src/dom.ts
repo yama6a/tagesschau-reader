@@ -42,3 +42,19 @@ const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
 export function formatDate(iso: string): string {
   return `${DATE_FORMAT.format(new Date(iso))} Uhr`;
 }
+
+const ROW_DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
+  day: '2-digit',
+  month: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+  timeZone: 'Europe/Berlin',
+});
+
+// "08.11. 09:12"
+export function formatRowDate(iso: string): string {
+  const part = (type: string) =>
+    ROW_DATE_FORMAT.formatToParts(new Date(iso)).find((p) => p.type === type)?.value;
+  return `${part('day')}.${part('month')}. ${part('hour')}:${part('minute')}`;
+}
