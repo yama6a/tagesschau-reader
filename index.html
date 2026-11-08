@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1c2841" />
+    <title>Nachrichten</title>
+    <link rel="icon" href="data:," />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <button id="mark-all" type="button">Alle als gelesen markieren</button>
+      <label class="switch">
+        <input id="show-read" type="checkbox" role="switch" />
+        Gelesene anzeigen
+      </label>
+      <button id="settings" type="button" aria-label="Einstellungen"></button>
+    </header>
+    <main>
+      <div id="refresh-status"></div>
+      <div id="list"></div>
+      <div id="sentinel"></div>
+      <div id="status"></div>
+    </main>
+    <dialog id="article" class="article" aria-label="Artikel"></dialog>
+    <dialog id="onboarding" class="onboarding" aria-label="Einstellungen"></dialog>
+  </body>
+</html>

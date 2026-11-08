@@ -1,0 +1,10 @@
+# The image builds from source, so only what the build reads reaches the context.
+*
+!package.json
+!package-lock.json
+!index.html
+!vite.config.ts
+!tsconfig.json
+!src
+!public
+!nginx.conf
