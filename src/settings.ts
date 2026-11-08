@@ -5,6 +5,7 @@ export const CATEGORIES = [
   { id: 'wissen', label: 'Wissen' },
   { id: 'investigativ', label: 'Investigativ' },
   { id: 'faktenfinder', label: 'Faktenfinder' },
+  { id: 'weitere', label: 'Weitere' },
   { id: 'sport', label: 'Sport' },
 ] as const;
 
@@ -36,7 +37,15 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  categories: ['inland', 'ausland', 'wirtschaft', 'wissen', 'investigativ', 'faktenfinder'],
+  categories: [
+    'inland',
+    'ausland',
+    'wirtschaft',
+    'wissen',
+    'investigativ',
+    'faktenfinder',
+    'weitere',
+  ],
   regions: [],
 };
 

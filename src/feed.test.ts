@@ -51,8 +51,43 @@ describe('keep', () => {
     expect(keep(story({ ressort: 'wissen' }), news)).toBe(false);
   });
 
-  it('drops nationwide stories without a ressort, such as the weather page', () => {
-    expect(keep(story({ ressort: null }), news)).toBe(false);
+  it('drops nationwide stories without a ressort unless Weitere is selected', () => {
+    const url = 'https://www.tagesschau.de/kultur/janosch-gestorben-100.html';
+    expect(keep(story({ ressort: null, detailsweb: url }), news)).toBe(false);
+  });
+
+  it('keeps nationwide stories without a ressort when Weitere is selected', () => {
+    const weitere: Settings = { categories: ['weitere'], regions: [] };
+    for (const path of [
+      'kultur/janosch-gestorben-100.html',
+      'newsticker/liveblog-midterms-2026-104.html',
+      'kommentar/usa-midterms-120.html',
+      'eilmeldung/usa-midterms-118.html',
+      'politikwissenschaftler-mueller-midterms-100.html',
+    ]) {
+      const detailsweb = `https://www.tagesschau.de/${path}`;
+      expect(keep(story({ ressort: null, detailsweb }), weitere)).toBe(true);
+    }
+    expect(keep(story({ ressort: null }), weitere)).toBe(true);
+  });
+
+  it('drops the weather, ARD studio and livestream pages from Weitere', () => {
+    const weitere: Settings = { categories: ['weitere'], regions: [] };
+    for (const path of [
+      'wetter/europa-welt',
+      'wetter/deutschland/wettervorhersage-deutschland-100.html',
+      'korrespondenten/studio-washington-101.html',
+      'korrespondenten/studio-prag-101.html',
+      'multimedia/livestreams/livestream-ts24-104.html',
+    ]) {
+      const detailsweb = `https://www.tagesschau.de/${path}`;
+      expect(keep(story({ ressort: null, detailsweb }), weitere)).toBe(false);
+    }
+  });
+
+  it('does not count stories with a ressort as Weitere', () => {
+    const weitere: Settings = { categories: ['weitere'], regions: [] };
+    expect(keep(story({ ressort: 'inland' }), weitere)).toBe(false);
   });
 
   it('keeps regional stories of a selected state whatever their ressort', () => {
