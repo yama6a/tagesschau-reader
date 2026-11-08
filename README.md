@@ -22,8 +22,10 @@ without notice.
 - The full feed holds every story the other ressort feeds hold, so it is the only feed for those categories.
   The sport feed holds stories the full feed lacks.
 - Sport stories come with `ressort: null`. The page counts every story of the sport feed as Sport.
-- A nationwide story shows only when its `ressort` is a selected category. Stories with `ressort: null`, such
-  as the weather page, the live blogs and culture stories, never show.
+- A nationwide story shows only when its `ressort` is a selected category.
+- A nationwide story with `ressort: null` counts as "Weitere". These are live blogs, culture stories,
+  commentaries and interviews. The page drops the ones whose `detailsweb` holds `/wetter/`, `/korrespondenten/`
+  or `/multimedia/livestreams/`. These are the weather pages, the ARD studio pages and the livestream pages.
 - With two feeds, the list shows only stories newer than the oldest loaded story of the feed that reaches
   least far back. The order then stays the same when the next page arrives.
 

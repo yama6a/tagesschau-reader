@@ -53,11 +53,27 @@ export function addPage(feed: Feed, source: Source, page: NewsPage, advance: boo
   }
 }
 
+// Section paths of nationwide stories without a ressort that are not news: the weather pages, the
+// ARD studio pages and the livestream pages. Live blogs, culture, commentary and interviews stay.
+const NON_NEWS_PATHS = ['/wetter/', '/korrespondenten/', '/multimedia/livestreams/'];
+
+function isNonNews(story: Story): boolean {
+  return NON_NEWS_PATHS.some((path) => story.detailsweb?.includes(path));
+}
+
+// A nationwide story without a ressort is a "Weitere" story unless it is a non-news page.
+function category(story: Story): string | null | undefined {
+  if (story.ressort == null && !isNonNews(story)) {
+    return 'weitere';
+  }
+  return story.ressort;
+}
+
 export function keep(story: Story, settings: Settings): boolean {
   if (story.type !== 'story') {
     return false;
   }
-  if (story.regionId === 0 && settings.categories.some((c) => c === story.ressort)) {
+  if (story.regionId === 0 && settings.categories.some((c) => c === category(story))) {
     return true;
   }
   return story.regionId != null && settings.regions.includes(story.regionId);
