@@ -319,6 +319,22 @@ dialog::backdrop {
   padding: calc(env(safe-area-inset-top) + 16px) 16px 8px;
 }
 
+/* An image does not flow under a float. Without this, the teaser image starts below the button. */
+.article:has(header figure) .close {
+  margin-bottom: -44px;
+  background: rgb(from var(--bg-bar) r g b / 0.6);
+}
+
+.article header figure {
+  margin: -16px -16px 12px;
+}
+
+.article header figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .article header .topline {
   -webkit-line-clamp: unset;
   margin: 0 0 4px;
@@ -388,7 +404,7 @@ dialog::backdrop {
   margin: 0 16px;
 }
 
-.content figcaption {
+.article figcaption {
   padding: 6px 16px;
   color: var(--muted);
   font-size: 13px;

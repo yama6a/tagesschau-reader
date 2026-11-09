@@ -108,6 +108,24 @@ describe('renderContent', () => {
     expect(out).toContain('<figcaption>Ein Bild Bildquelle: dpa</figcaption>');
   });
 
+  it('leaves out a gallery image that the article view shows as teaser', () => {
+    const teaser = { imageVariants: { '16x9-640': 'https://i/teaser.jpg' } };
+    const div = document.createElement('div');
+    div.append(
+      renderContent(
+        [
+          {
+            type: 'image_gallery',
+            gallery: [teaser, { imageVariants: { '16x9-640': 'https://i/other.jpg' } }],
+          },
+        ],
+        teaser,
+      ),
+    );
+    const srcs = [...div.querySelectorAll('img')].map((img) => img.getAttribute('src'));
+    expect(srcs).toEqual(['https://i/other.jpg']);
+  });
+
   it('renders a video with poster and an audio player', () => {
     const div = document.createElement('div');
     div.append(
