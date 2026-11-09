@@ -1,5 +1,5 @@
 import { fetchJson, type Article } from './api';
-import { renderContent } from './content';
+import { figure, renderContent } from './content';
 import { el, formatDate, icon, ICON_CLOSE } from './dom';
 import type { Story } from './feed';
 import { failure } from './status';
@@ -38,7 +38,9 @@ export function initModal(node: HTMLDialogElement): void {
 
 export function openArticle(story: Story): void {
   shown = story;
+  const teaser = story.teaserImage && figure(story.teaserImage);
   header.replaceChildren(
+    ...(teaser ? [teaser] : []),
     ...(story.topline ? [el('p', { class: 'topline' }, story.topline)] : []),
     el('h2', {}, story.title),
     el('p', { class: 'date' }, formatDate(story.date)),
@@ -69,7 +71,7 @@ async function load(story: Story): Promise<void> {
     }
     const article = await fetchJson<Article>(story.details);
     if (shown === story) {
-      body.replaceChildren(renderContent(article.content ?? []));
+      body.replaceChildren(renderContent(article.content ?? [], story.teaserImage));
     }
   } catch {
     if (shown === story) {

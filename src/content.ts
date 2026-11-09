@@ -56,8 +56,12 @@ function variant(image: Image | undefined, ...keys: string[]): string | undefine
   return undefined;
 }
 
-function figure(image: Image): HTMLElement | undefined {
-  const src = variant(image, '16x9-640', '16x9-960', '1x1-640');
+function imageSrc(image: Image | undefined): string | undefined {
+  return variant(image, '16x9-640', '16x9-960', '1x1-640');
+}
+
+export function figure(image: Image): HTMLElement | undefined {
+  const src = imageSrc(image);
   if (!src) {
     return undefined;
   }
@@ -103,7 +107,7 @@ function audioFigure(block: ContentBlock): HTMLElement | undefined {
   return el('figure', {}, ...(block.title ? [el('figcaption', {}, block.title)] : []), player);
 }
 
-function renderBlock(block: ContentBlock): Node[] {
+function renderBlock(block: ContentBlock, teaserSrc: string | undefined): Node[] {
   switch (block.type) {
     case 'text':
       return [el('div', { class: 'text' }, sanitize(block.value ?? ''))];
@@ -112,7 +116,10 @@ function renderBlock(block: ContentBlock): Node[] {
     case 'quotation':
       return [el('blockquote', {}, sanitize(block.quotation?.text ?? ''))];
     case 'image_gallery':
-      return (block.gallery ?? []).map(figure).filter((f) => f !== undefined);
+      return (block.gallery ?? [])
+        .filter((image) => !teaserSrc || imageSrc(image) !== teaserSrc)
+        .map(figure)
+        .filter((f) => f !== undefined);
     case 'video':
       return [videoFigure(block.video)].filter((f) => f !== undefined);
     case 'audio':
@@ -122,10 +129,13 @@ function renderBlock(block: ContentBlock): Node[] {
   }
 }
 
-export function renderContent(blocks: ContentBlock[]): DocumentFragment {
+// The article view shows the teaser image above the headline, so a gallery image with the same
+// address is left out of the body.
+export function renderContent(blocks: ContentBlock[], teaser?: Image): DocumentFragment {
+  const teaserSrc = imageSrc(teaser);
   const frag = document.createDocumentFragment();
   for (const block of blocks) {
-    frag.append(...renderBlock(block));
+    frag.append(...renderBlock(block, teaserSrc));
   }
   return frag;
 }
