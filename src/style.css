@@ -47,19 +47,49 @@ svg {
   stroke-linejoin: round;
 }
 
-/* Top bar */
+/* Tabs and the news bar */
 
-.topbar {
+.top {
   position: sticky;
   top: 0;
   z-index: 1;
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg-bar);
+}
+
+.tabs {
+  display: flex;
+}
+
+.tabs button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tabs button[aria-selected="true"] {
+  border-bottom-color: var(--text);
+  color: var(--text);
+}
+
+.topbar {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: env(safe-area-inset-top) 4px 0 8px;
+  padding: 0 4px 0 8px;
   min-height: 48px;
-  background: var(--bg-bar);
+  border-top: 1px solid var(--divider);
   font-size: 14px;
+}
+
+/* display: flex above would override the hidden attribute. */
+.topbar[hidden] {
+  display: none;
 }
 
 .topbar > button {
@@ -253,6 +283,7 @@ main {
 }
 
 #status p,
+#video-status p,
 .loading {
   margin: 0;
   padding: 24px 16px 40px;
@@ -329,10 +360,21 @@ dialog::backdrop {
   margin: -16px -16px 12px;
 }
 
-.article header figure img {
+.article header figure img,
+.article header video {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.article header video {
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.content .synopsis {
+  margin: 0 0 16px;
+  white-space: pre-line;
 }
 
 .article header .topline {

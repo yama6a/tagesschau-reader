@@ -53,3 +53,12 @@ export function loadShowRead(): boolean {
 export function saveShowRead(on: boolean): void {
   write('showRead', on);
 }
+
+// Maps the ARD id of a watched broadcast to its date.
+export function loadWatched(): Record<string, string> {
+  return read<Record<string, string>>('watchedIds') ?? {};
+}
+
+export function saveWatched(watched: Record<string, string>): void {
+  write('watchedIds', watched);
+}

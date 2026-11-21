@@ -26,6 +26,7 @@ import {
 import type { Settings } from './settings';
 import { failure } from './status';
 import * as storage from './storage';
+import { refreshVideos, showVideos } from './videoView';
 
 const REFRESH_MS = 2 * 60 * 1000;
 
@@ -223,10 +224,46 @@ new IntersectionObserver(
   { rootMargin: '0px 0px 800px 0px' },
 ).observe(sentinel);
 
-setInterval(() => void refresh(), REFRESH_MS);
+type Tab = 'news' | 'videos';
+const tabButtons = document.querySelectorAll<HTMLButtonElement>('.tabs [data-tab]');
+const newsParts = [byId('news-bar'), byId('news-view')];
+const videosView = byId('videos-view');
+// Each tab keeps its own scroll position.
+const scrollOf: Record<Tab, number> = { news: 0, videos: 0 };
+let tab: Tab = 'news';
+
+function showTab(next: Tab): void {
+  if (next === tab) {
+    return;
+  }
+  scrollOf[tab] = window.scrollY;
+  tab = next;
+  for (const button of tabButtons) {
+    button.setAttribute('aria-selected', String(button.dataset.tab === next));
+  }
+  for (const part of newsParts) {
+    part.hidden = next !== 'news';
+  }
+  videosView.hidden = next !== 'videos';
+  if (next === 'videos') {
+    showVideos();
+  }
+  window.scrollTo(0, scrollOf[next]);
+}
+
+for (const button of tabButtons) {
+  button.addEventListener('click', () => showTab(button.dataset.tab as Tab));
+}
+
+function refreshAll(): void {
+  void refresh();
+  void refreshVideos();
+}
+
+setInterval(refreshAll, REFRESH_MS);
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    void refresh();
+    refreshAll();
   }
 });
 

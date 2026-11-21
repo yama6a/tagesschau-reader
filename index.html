@@ -9,19 +9,32 @@
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <header class="topbar">
-      <button id="mark-all" type="button">Alle als gelesen markieren</button>
-      <label class="switch">
-        <input id="show-read" type="checkbox" role="switch" />
-        Gelesene anzeigen
-      </label>
-      <button id="settings" type="button" aria-label="Einstellungen"></button>
+    <header class="top">
+      <nav class="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="news" aria-selected="true">Nachrichten</button>
+        <button type="button" role="tab" data-tab="videos" aria-selected="false">Videos</button>
+      </nav>
+      <div id="news-bar" class="topbar">
+        <button id="mark-all" type="button">Alle als gelesen markieren</button>
+        <label class="switch">
+          <input id="show-read" type="checkbox" role="switch" />
+          Gelesene anzeigen
+        </label>
+        <button id="settings" type="button" aria-label="Einstellungen"></button>
+      </div>
     </header>
     <main>
-      <div id="refresh-status"></div>
-      <div id="list"></div>
-      <div id="sentinel"></div>
-      <div id="status"></div>
+      <section id="news-view">
+        <div id="refresh-status"></div>
+        <div id="list"></div>
+        <div id="sentinel"></div>
+        <div id="status"></div>
+      </section>
+      <section id="videos-view" hidden>
+        <div id="video-list"></div>
+        <div id="video-sentinel"></div>
+        <div id="video-status"></div>
+      </section>
     </main>
     <dialog id="article" class="article" aria-label="Artikel"></dialog>
     <dialog id="onboarding" class="onboarding" aria-label="Einstellungen"></dialog>
