@@ -1,15 +1,37 @@
+import type { NewsItem } from './api';
 import { el, formatRowDate, icon, ICON_CHECK, ICON_UNDO } from './dom';
-import type { Story } from './feed';
 import type { RowMode } from './readState';
 
+export type RowItem = Pick<
+  NewsItem,
+  | 'sophoraId'
+  | 'date'
+  | 'title'
+  | 'topline'
+  | 'breakingNews'
+  | 'teaserImage'
+  | 'detailsweb'
+  | 'shareURL'
+>;
+
 export interface Entry {
-  story: Story;
+  story: RowItem;
   mode: RowMode;
 }
 
-// Rows are kept by sophoraId, so a new render moves existing rows and their images stay loaded.
-// A row is built again when a refresh changes its text or its breaking news flag.
-const rows = new Map<string, HTMLElement>();
+// Rows are kept per list by sophoraId, so a new render moves existing rows and their images stay
+// loaded. A row is built again when a refresh changes its text or its breaking news flag.
+const rowsByList = new Map<HTMLElement, Map<string, HTMLElement>>();
+
+function rowsOf(container: HTMLElement): Map<string, HTMLElement> {
+  let rows = rowsByList.get(container);
+  if (!rows) {
+    rows = new Map();
+    rowsByList.set(container, rows);
+  }
+  return rows;
+}
+
 // Rows whose title size is not set for the current width yet.
 const unfitted = new Set<HTMLElement>();
 
@@ -46,13 +68,13 @@ export function observeFit(container: HTMLElement): void {
   new ResizeObserver(() => {
     if (container.clientWidth !== width) {
       width = container.clientWidth;
-      fitRows(rows.values());
+      fitRows(rowsOf(container).values());
     }
   }).observe(container);
-  void document.fonts?.ready.then(() => fitRows(rows.values()));
+  void document.fonts?.ready.then(() => fitRows(rowsOf(container).values()));
 }
 
-function buildRow(story: Story): HTMLElement {
+function buildRow(story: RowItem): HTMLElement {
   const variants = story.teaserImage?.imageVariants;
   const thumb = el('div', { class: 'thumb' });
   if (variants?.['1x1-256']) {
@@ -113,6 +135,7 @@ function updateRow(row: HTMLElement, mode: RowMode): void {
 }
 
 export function renderRows(container: HTMLElement, entries: Entry[]): void {
+  const rows = rowsOf(container);
   const wanted: HTMLElement[] = [];
   for (const { story, mode } of entries) {
     if (mode === 'hidden') {
@@ -151,7 +174,7 @@ export function renderRows(container: HTMLElement, entries: Entry[]): void {
 }
 
 export function clearRows(container: HTMLElement): void {
-  rows.clear();
+  rowsOf(container).clear();
   unfitted.clear();
   container.replaceChildren();
 }

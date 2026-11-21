@@ -1,7 +1,15 @@
 # tagesschau-reader
 
 A static web page for the phone that lists tagesschau stories newest first and opens each one in a dialog.
-The browser calls the tagesschau API itself. There is no backend.
+The browser calls the tagesschau API and the ARD Mediathek API itself. There is no backend.
+
+The page has two tabs. It always opens on Nachrichten.
+
+- Nachrichten lists the stories. The bar with "Alle als gelesen markieren", "Gelesene anzeigen" and the
+  settings belongs to this tab only.
+- Videos lists every Tagesschau and Tagesthemen broadcast, newest first, and plays it in a dialog.
+
+On Nachrichten:
 
 - Onboarding picks categories and federal states. The choice, the read marks and the "Gelesene anzeigen"
   switch live in `localStorage`, all under the key prefix `tagesschau-reader.v1.`.
@@ -9,8 +17,17 @@ The browser calls the tagesschau API itself. There is no backend.
 - The list pages back day by day as you scroll, about 30 days far.
 - The list fetches the newest stories again every 2 minutes and when the tab becomes visible.
 
-Risk: the API is the unofficial one the tagesschau app uses (bund.dev "tagesschau-api"). It can change or close
-without notice.
+On Videos:
+
+- A broadcast counts as watched when it starts to play. Its row then dims and stays in the list. The check
+  button on the row marks it watched or unwatched by hand. The marks live in `localStorage` under
+  `watchedIds`.
+- The list pages back as you scroll. The ARD archive goes back years.
+- The player offers HLS first and the MP4 of 720 lines second. The browser plays the first one it supports.
+
+Risk: both APIs are unofficial. The tagesschau API is the one the tagesschau app uses (bund.dev
+"tagesschau-api"). The ARD Mediathek API is the one ardmediathek.de uses. Either can change or close without
+notice.
 
 ## Data sources
 
@@ -28,6 +45,20 @@ without notice.
   or `/multimedia/livestreams/`. These are the weather pages, the ARD studio pages and the livestream pages.
 - With two feeds, the list shows only stories newer than the oldest loaded story of the feed that reaches
   least far back. The order then stays the same when the next page arrives.
+
+| Videos      | Feed                                                                                |
+| ----------- | ----------------------------------------------------------------------------------- |
+| Tagesschau  | `https://api.ardmediathek.de/page-gateway/widgets/ard/asset/<show ID>`, 50 per page |
+| Tagesthemen | The same, with the Tagesthemen show ID                                              |
+
+- The show IDs are the base64 of `crid://daserste.de/tagesschau` and `crid://daserste.de/tagesthemen`.
+- The tagesschau API has no list of past broadcasts. Its search returns only the newest 50 hits.
+- A show list also holds single reports. The page keeps only titles such as "tagesthemen 21:45 Uhr,
+  20.11.2026" and "tagesthemen extra 20:15 Uhr, 03.11.2026".
+- The Videos list uses the same rule as two news feeds. It shows broadcasts down to the oldest loaded one of
+  the show that reaches least far back.
+- The dialog reads the streams and the topics from
+  `https://api.ardmediathek.de/page-gateway/pages/ard/item/<id>`.
 
 ## Run locally
 

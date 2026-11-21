@@ -58,6 +58,41 @@ export interface Article {
   content?: ContentBlock[];
 }
 
+// The ARD Mediathek API. It lists every broadcast of a show, newest first. The tagesschau API only
+// holds the latest one per show.
+export const ARD_API = 'https://api.ardmediathek.de/page-gateway';
+
+// An image `src` holds the placeholder `{width}` for the width in pixels.
+export interface ArdImage {
+  alt?: string;
+  src: string;
+}
+
+export interface ArdTeaser {
+  id: string;
+  longTitle: string;
+  broadcastedOn: string;
+  images?: { aspect1x1?: ArdImage; aspect16x9?: ArdImage };
+}
+
+export interface ArdShowPage {
+  teasers: ArdTeaser[];
+  pagination: { pageNumber: number; pageSize: number; totalElements: number };
+}
+
+export interface ArdMedia {
+  url: string;
+  mimeType: string;
+  maxVResolutionPx?: number;
+}
+
+export interface ArdItem {
+  widgets: {
+    synopsis?: string;
+    mediaCollection?: { embedded?: { streams?: { media: ArdMedia[] }[] } };
+  }[];
+}
+
 export async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) {

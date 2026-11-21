@@ -1,6 +1,6 @@
 import './style.css';
 import { fetchJson, type NewsPage } from './api';
-import { el, icon, ICON_SETTINGS } from './dom';
+import { byId, el, icon, ICON_SETTINGS, nearViewport } from './dom';
 import {
   addPage,
   createFeed,
@@ -26,12 +26,9 @@ import {
 import type { Settings } from './settings';
 import { failure } from './status';
 import * as storage from './storage';
+import { refreshVideos, showVideos } from './videoView';
 
 const REFRESH_MS = 2 * 60 * 1000;
-
-function byId<T extends HTMLElement>(id: string): T {
-  return document.getElementById(id) as T;
-}
 
 const list = byId<HTMLElement>('list');
 const sentinel = byId<HTMLElement>('sentinel');
@@ -90,11 +87,6 @@ function renderStatus(): void {
   }
 }
 
-function sentinelInView(): boolean {
-  const box = sentinel.getBoundingClientRect();
-  return box.top < window.innerHeight + 800;
-}
-
 async function loadMore(): Promise<void> {
   const f = feed;
   if (!f || loading || !canLoadMore(f)) {
@@ -119,7 +111,7 @@ async function loadMore(): Promise<void> {
   });
   loading = false;
   render();
-  if (!loadFailed && (shownCount === before || sentinelInView())) {
+  if (!loadFailed && (shownCount === before || nearViewport(sentinel))) {
     void loadMore();
   }
 }
@@ -184,7 +176,7 @@ list.addEventListener('click', (e) => {
   if (target.closest('[data-action="toggle"]')) {
     setRead(story, !isRead(readState, story));
     // A row that turns into a strip can pull the sentinel into view.
-    if (sentinelInView()) {
+    if (nearViewport(sentinel)) {
       void loadMore();
     }
     return;
@@ -214,7 +206,7 @@ showReadToggle.addEventListener('change', () => {
   showRead = showReadToggle.checked;
   storage.saveShowRead(showRead);
   render();
-  if (sentinelInView()) {
+  if (nearViewport(sentinel)) {
     void loadMore();
   }
 });
@@ -232,10 +224,46 @@ new IntersectionObserver(
   { rootMargin: '0px 0px 800px 0px' },
 ).observe(sentinel);
 
-setInterval(() => void refresh(), REFRESH_MS);
+type Tab = 'news' | 'videos';
+const tabButtons = document.querySelectorAll<HTMLButtonElement>('.tabs [data-tab]');
+const newsParts = [byId('news-bar'), byId('news-view')];
+const videosView = byId('videos-view');
+// Each tab keeps its own scroll position.
+const scrollOf: Record<Tab, number> = { news: 0, videos: 0 };
+let tab: Tab = 'news';
+
+function showTab(next: Tab): void {
+  if (next === tab) {
+    return;
+  }
+  scrollOf[tab] = window.scrollY;
+  tab = next;
+  for (const button of tabButtons) {
+    button.setAttribute('aria-selected', String(button.dataset.tab === next));
+  }
+  for (const part of newsParts) {
+    part.hidden = next !== 'news';
+  }
+  videosView.hidden = next !== 'videos';
+  if (next === 'videos') {
+    showVideos();
+  }
+  window.scrollTo(0, scrollOf[next]);
+}
+
+for (const button of tabButtons) {
+  button.addEventListener('click', () => showTab(button.dataset.tab as Tab));
+}
+
+function refreshAll(): void {
+  void refresh();
+  void refreshVideos();
+}
+
+setInterval(refreshAll, REFRESH_MS);
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    void refresh();
+    refreshAll();
   }
 });
 
