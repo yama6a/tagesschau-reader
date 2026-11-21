@@ -5,12 +5,15 @@ export interface Story extends NewsItem {
   time: number;
 }
 
-// One paged list of the API. `next` is undefined before the first page arrives and null once the
+// One paged list of an API. `next` is undefined before the first page arrives and null once the
 // API has no older page. `oldest` is the time of the oldest item loaded from this source.
-export interface Source {
+export interface Paged {
   url: string;
   next: string | null | undefined;
   oldest: number;
+}
+
+export interface Source extends Paged {
   // The sport feed sends ressort null on its stories, so they get this ressort instead.
   ressort?: string;
 }
@@ -81,7 +84,7 @@ export function keep(story: Story, settings: Settings): boolean {
 
 // Stories older than this may still have newer neighbours in a source that has not paged that
 // far back yet. Hiding them keeps the order stable when the next page arrives.
-export function cutoff(feed: Feed): number {
+export function cutoff(feed: { sources: Paged[] }): number {
   let limit = -Infinity;
   for (const s of feed.sources) {
     if (typeof s.next === 'string') {
@@ -99,19 +102,19 @@ export function listed(feed: Feed, settings: Settings): Story[] {
     .sort((a, b) => Number(!!b.breakingNews) - Number(!!a.breakingNews) || b.time - a.time);
 }
 
-export interface Load {
-  source: Source;
+export interface Load<S extends Paged = Source> {
+  source: S;
   url: string;
 }
 
 // The pages to fetch next: every missing first page, or else the next page of the source that
 // reaches least far back. Empty when every source is done.
-export function nextLoads(feed: Feed): Load[] {
+export function nextLoads<S extends Paged>(feed: { sources: S[] }): Load<S>[] {
   const missing = feed.sources.filter((s) => s.next === undefined);
   if (missing.length > 0) {
     return missing.map((source) => ({ source, url: source.url }));
   }
-  let pick: Source | undefined;
+  let pick: S | undefined;
   for (const s of feed.sources) {
     if (typeof s.next === 'string' && (!pick || s.oldest > pick.oldest)) {
       pick = s;
@@ -120,6 +123,6 @@ export function nextLoads(feed: Feed): Load[] {
   return pick ? [{ source: pick, url: pick.next as string }] : [];
 }
 
-export function exhausted(feed: Feed): boolean {
+export function exhausted(feed: { sources: Paged[] }): boolean {
   return feed.sources.every((s) => s.next === null);
 }

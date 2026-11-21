@@ -1,6 +1,6 @@
 import './style.css';
 import { fetchJson, type NewsPage } from './api';
-import { el, icon, ICON_SETTINGS } from './dom';
+import { byId, el, icon, ICON_SETTINGS, nearViewport } from './dom';
 import {
   addPage,
   createFeed,
@@ -28,10 +28,6 @@ import { failure } from './status';
 import * as storage from './storage';
 
 const REFRESH_MS = 2 * 60 * 1000;
-
-function byId<T extends HTMLElement>(id: string): T {
-  return document.getElementById(id) as T;
-}
 
 const list = byId<HTMLElement>('list');
 const sentinel = byId<HTMLElement>('sentinel');
@@ -90,11 +86,6 @@ function renderStatus(): void {
   }
 }
 
-function sentinelInView(): boolean {
-  const box = sentinel.getBoundingClientRect();
-  return box.top < window.innerHeight + 800;
-}
-
 async function loadMore(): Promise<void> {
   const f = feed;
   if (!f || loading || !canLoadMore(f)) {
@@ -119,7 +110,7 @@ async function loadMore(): Promise<void> {
   });
   loading = false;
   render();
-  if (!loadFailed && (shownCount === before || sentinelInView())) {
+  if (!loadFailed && (shownCount === before || nearViewport(sentinel))) {
     void loadMore();
   }
 }
@@ -184,7 +175,7 @@ list.addEventListener('click', (e) => {
   if (target.closest('[data-action="toggle"]')) {
     setRead(story, !isRead(readState, story));
     // A row that turns into a strip can pull the sentinel into view.
-    if (sentinelInView()) {
+    if (nearViewport(sentinel)) {
       void loadMore();
     }
     return;
@@ -214,7 +205,7 @@ showReadToggle.addEventListener('change', () => {
   showRead = showReadToggle.checked;
   storage.saveShowRead(showRead);
   render();
-  if (sentinelInView()) {
+  if (nearViewport(sentinel)) {
     void loadMore();
   }
 });

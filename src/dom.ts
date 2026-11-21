@@ -11,6 +11,19 @@ export function el<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
+export function byId<T extends HTMLElement>(id: string): T {
+  return document.getElementById(id) as T;
+}
+
+// Whether the element is on screen or less than 800px below it. An element in a hidden tab has no
+// box, so it never counts.
+export function nearViewport(node: Element): boolean {
+  if (node.getClientRects().length === 0) {
+    return false;
+  }
+  return node.getBoundingClientRect().top < window.innerHeight + 800;
+}
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 // A 24 x 24 stroked icon from one path.
