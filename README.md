@@ -54,11 +54,13 @@ notice.
 - The show IDs are the base64 of `crid://daserste.de/tagesschau` and `crid://daserste.de/tagesthemen`.
 - The tagesschau API has no list of past broadcasts. Its search returns only the newest 50 hits.
 - A show list also holds single reports, and the Tagesschau list holds every edition of the day. The page
-  keeps only titles such as "tagesschau 20:00 Uhr, 21.11.2026", "tagesthemen 21:45 Uhr, 20.11.2026" and
-  "tagesthemen extra 20:15 Uhr, 03.11.2026".
+  keeps a title that holds "tagesschau" and a time from 19:00 to 20:59, or "tagesthemen" and any time. Case,
+  punctuation and other words do not matter. Examples: "tagesschau 20:00 Uhr, 21.11.2026" and
+  "tagesthemen-extra 21:45 Uhr, 21.07.2024".
+- A title with "Gebärdensprache" or "Einfache Sprache" is a repeat in sign language or plain language. The
+  page drops it.
 - The main Tagesschau is the only edition with a title time from 19:00 to 20:59. On a few days it moved, for
   example to 20:20 on 2 December 2025.
-- The filter knows only the title format in use since 2023. Older broadcasts do not show.
 - The Videos list uses the same rule as two news feeds. It shows broadcasts down to the oldest loaded one of
   the show that reaches least far back.
 - The dialog reads the streams and the topics from
