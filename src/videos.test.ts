@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { ArdItem, ArdShowPage, ArdTeaser } from './api';
 import { nextLoads } from './feed';
-import { addVideoPage, createVideoFeed, listedVideos, playable, showPageUrl } from './videos';
+import {
+  addVideoPage,
+  createVideoFeed,
+  isBroadcast,
+  listedVideos,
+  playable,
+  showPageUrl,
+} from './videos';
 
 function teaser(id: string, title: string, at: string): ArdTeaser {
   return {
@@ -20,6 +27,29 @@ function teaser(id: string, title: string, at: string): ArdTeaser {
 function page(teasers: ArdTeaser[], pageNumber = 0, totalElements = 1000): ArdShowPage {
   return { teasers, pagination: { pageNumber, pageSize: 50, totalElements } };
 }
+
+describe('isBroadcast', () => {
+  it('takes any title that names the show and a time', () => {
+    expect(isBroadcast('tagesschau 20:00 Uhr, 21.11.2026')).toBe(true);
+    expect(isBroadcast('Tagesschau, 20:20 Uhr')).toBe(true);
+    expect(isBroadcast('tagesschau 19:45 Uhr Sondersendung')).toBe(true);
+    expect(isBroadcast('tagesthemen 21:45 Uhr, 20.11.2026')).toBe(true);
+    expect(isBroadcast('tagesthemen-extra 21:45 Uhr, 21.07.2024')).toBe(true);
+  });
+
+  it('drops other Tagesschau editions and single reports', () => {
+    expect(isBroadcast('tagesschau 17:00 Uhr, 21.11.2026')).toBe(false);
+    expect(isBroadcast('tagesschau 00:05 Uhr, 21.11.2026')).toBe(false);
+    expect(isBroadcast('Zwickau · Pilot-Projekt in VW-Werk')).toBe(false);
+    expect(isBroadcast('tagesthemen extra: Joachim Gauck soll Bundespräsident werden')).toBe(false);
+  });
+
+  it('drops the versions in sign language and plain language', () => {
+    expect(isBroadcast('tagesschau mit Gebärdensprache, 20:00 Uhr')).toBe(false);
+    expect(isBroadcast('tagesschau in Gebärdensprache 20:00 Uhr, 21.11.2026')).toBe(false);
+    expect(isBroadcast('tagesschau in Einfacher Sprache 19:00 Uhr, 20.11.2026')).toBe(false);
+  });
+});
 
 describe('addVideoPage', () => {
   it('keeps broadcasts and drops single reports', () => {
@@ -47,13 +77,11 @@ describe('addVideoPage', () => {
         teaser('ts20', 'tagesschau 20:00 Uhr, 21.11.2026', '2026-11-21T19:00:00Z'),
         teaser('ts17', 'tagesschau 17:00 Uhr, 21.11.2026', '2026-11-21T16:00:00Z'),
         teaser('moved', 'tagesschau 20:20 Uhr, 02.12.2025', '2025-12-02T19:00:00Z'),
-        teaser('comma', 'tagesschau, 20:00 Uhr', '2022-03-06T19:00:00Z'),
-        teaser('dot', 'tagesschau 20.00 Uhr', '2023-08-07T18:00:00Z'),
         teaser('ts0005', 'tagesschau 00:05 Uhr, 21.11.2026', '2026-11-20T23:05:00Z'),
       ]),
       true,
     );
-    expect([...feed.videos.keys()]).toEqual(['ts20', 'moved', 'comma', 'dot']);
+    expect([...feed.videos.keys()]).toEqual(['ts20', 'moved']);
   });
 
   it('builds the row image and the Mediathek link', () => {

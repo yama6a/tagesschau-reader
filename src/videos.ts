@@ -17,10 +17,19 @@ const SHOWS = [
 const PAGE_SIZE = 50;
 
 // The show lists also hold single reports and, for Tagesschau, every edition of the day. The page
-// keeps the main Tagesschau and every Tagesthemen. The main Tagesschau is the only edition between
-// 19:00 and 20:59. It moved to 20:20, 20:45 or 20:50 on a few days. Titles before 2023 read
-// "tagesschau, 20:00 Uhr", and one reads "tagesschau 20.00 Uhr".
-const BROADCAST = /^(tagesschau,? (19|20)[:.]\d{2} Uhr|tagesthemen( extra)? \d{1,2}:\d{2} Uhr)/;
+// keeps the main Tagesschau and every Tagesthemen. A broadcast names its show and its start time in
+// the title. The main Tagesschau is the only edition between 19:00 and 20:59. On a few days it moved
+// from 20:00, for example to 20:20. The versions in sign language and in plain language
+// ("Gebärdensprache", "Einfache Sprache") repeat a broadcast, so they stay out.
+export function isBroadcast(title: string): boolean {
+  if (/geb(ä|ae)rden|einfache[nr]? sprache/i.test(title)) {
+    return false;
+  }
+  if (/tagesschau/i.test(title)) {
+    return /\b(19|20):\d{2}\b/.test(title);
+  }
+  return /tagesthemen/i.test(title) && /\b\d{1,2}:\d{2}\b/.test(title);
+}
 
 const HLS = 'application/vnd.apple.mpegurl';
 
@@ -99,7 +108,7 @@ export function addVideoPage(
       continue;
     }
     source.oldest = Math.min(source.oldest, time);
-    if (BROADCAST.test(teaser.longTitle)) {
+    if (isBroadcast(teaser.longTitle)) {
       feed.videos.set(teaser.id, toVideo(teaser, time));
     }
   }
