@@ -18,9 +18,8 @@ const PAGE_SIZE = 50;
 
 // The show lists also hold single reports and, for Tagesschau, every edition of the day. The page
 // keeps the main Tagesschau and every Tagesthemen. The main Tagesschau is the only edition between
-// 19:00 and 20:59. It moved to 20:20, 20:45 or 20:50 on a few days. Titles before 2023 read
-// "tagesschau, 20:00 Uhr", and one reads "tagesschau 20.00 Uhr".
-const BROADCAST = /^(tagesschau,? (19|20)[:.]\d{2} Uhr|tagesthemen( extra)? \d{1,2}:\d{2} Uhr)/;
+// 19:00 and 20:59. On a few days it moved from 20:00, for example to 20:20.
+const BROADCAST = /^(tagesschau (19|20):\d{2} Uhr|tagesthemen( extra)? \d{1,2}:\d{2} Uhr)/;
 
 const HLS = 'application/vnd.apple.mpegurl';
 
