@@ -7,7 +7,7 @@ The page has two tabs. It always opens on Nachrichten.
 
 - Nachrichten lists the stories. The bar with "Alle als gelesen markieren", "Gelesene anzeigen" and the
   settings belongs to this tab only.
-- Videos lists the Tagesschau at 20:00 and every Tagesthemen, newest first, and plays them in a dialog.
+- Videos lists the main Tagesschau and every Tagesthemen, newest first, and plays them in a dialog.
 
 On Nachrichten:
 
@@ -56,6 +56,8 @@ notice.
 - A show list also holds single reports, and the Tagesschau list holds every edition of the day. The page
   keeps only titles such as "tagesschau 20:00 Uhr, 21.11.2026", "tagesthemen 21:45 Uhr, 20.11.2026" and
   "tagesthemen extra 20:15 Uhr, 03.11.2026".
+- The main Tagesschau is the only edition with a title time from 19:00 to 20:59. On a few days it moved, for
+  example to 20:20 on 2 December 2025. Titles before 2023 read "tagesschau, 20:00 Uhr".
 - The Videos list uses the same rule as two news feeds. It shows broadcasts down to the oldest loaded one of
   the show that reaches least far back.
 - The dialog reads the streams and the topics from

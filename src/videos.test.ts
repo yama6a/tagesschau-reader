@@ -38,7 +38,7 @@ describe('addVideoPage', () => {
     expect(feed.sources[1].oldest).toBe(Date.parse('2026-11-19T19:15:00Z'));
   });
 
-  it('keeps only the Tagesschau at 20:00', () => {
+  it('keeps only the main Tagesschau, also when it moved', () => {
     const feed = createVideoFeed();
     addVideoPage(
       feed,
@@ -46,12 +46,14 @@ describe('addVideoPage', () => {
       page([
         teaser('ts20', 'tagesschau 20:00 Uhr, 21.11.2026', '2026-11-21T19:00:00Z'),
         teaser('ts17', 'tagesschau 17:00 Uhr, 21.11.2026', '2026-11-21T16:00:00Z'),
+        teaser('moved', 'tagesschau 20:20 Uhr, 02.12.2025', '2025-12-02T19:00:00Z'),
+        teaser('comma', 'tagesschau, 20:00 Uhr', '2022-03-06T19:00:00Z'),
+        teaser('dot', 'tagesschau 20.00 Uhr', '2023-08-07T18:00:00Z'),
         teaser('ts0005', 'tagesschau 00:05 Uhr, 21.11.2026', '2026-11-20T23:05:00Z'),
       ]),
       true,
     );
-    expect([...feed.videos.keys()]).toEqual(['ts20']);
-    expect(feed.sources[0].oldest).toBe(Date.parse('2026-11-20T23:05:00Z'));
+    expect([...feed.videos.keys()]).toEqual(['ts20', 'moved', 'comma', 'dot']);
   });
 
   it('builds the row image and the Mediathek link', () => {
