@@ -16,9 +16,11 @@ const SHOWS = [
 ];
 const PAGE_SIZE = 50;
 
-// The show lists also hold single reports. A broadcast has a title such as
-// "tagesthemen 21:45 Uhr, 20.11.2026" or "tagesthemen extra 20:15 Uhr, 03.11.2026".
-const BROADCAST = /^(tagesschau|tagesthemen)( extra)? \d{1,2}:\d{2} Uhr/;
+// The show lists also hold single reports and, for Tagesschau, every edition of the day. The page
+// keeps the main Tagesschau and every Tagesthemen. The main Tagesschau is the only edition between
+// 19:00 and 20:59. It moved to 20:20, 20:45 or 20:50 on a few days. Titles before 2023 read
+// "tagesschau, 20:00 Uhr", and one reads "tagesschau 20.00 Uhr".
+const BROADCAST = /^(tagesschau,? (19|20)[:.]\d{2} Uhr|tagesthemen( extra)? \d{1,2}:\d{2} Uhr)/;
 
 const HLS = 'application/vnd.apple.mpegurl';
 
