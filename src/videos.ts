@@ -16,9 +16,10 @@ const SHOWS = [
 ];
 const PAGE_SIZE = 50;
 
-// The show lists also hold single reports. A broadcast has a title such as
-// "tagesthemen 21:45 Uhr, 20.11.2026" or "tagesthemen extra 20:15 Uhr, 03.11.2026".
-const BROADCAST = /^(tagesschau|tagesthemen)( extra)? \d{1,2}:\d{2} Uhr/;
+// The show lists also hold single reports and, for Tagesschau, every edition of the day. The page
+// keeps the Tagesschau at 20:00 and every Tagesthemen: "tagesschau 20:00 Uhr, 21.11.2026",
+// "tagesthemen 21:45 Uhr, 20.11.2026" and "tagesthemen extra 20:15 Uhr, 03.11.2026".
+const BROADCAST = /^(tagesschau 20:00 Uhr|tagesthemen( extra)? \d{1,2}:\d{2} Uhr)/;
 
 const HLS = 'application/vnd.apple.mpegurl';
 
