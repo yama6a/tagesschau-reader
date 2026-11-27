@@ -1,0 +1,24 @@
+name: warm-cache
+
+# A cache written on a PR is restorable only by that same PR, so PRs never share one. A cache
+# written on main is restorable by all of them, which is the only reason this workflow exists.
+# Only on a lockfile change: the npm cache is keyed off it, so a merge that leaves it alone
+# leaves the existing cache valid.
+on:
+  push:
+    branches: [main]
+    paths: ["package-lock.json"]
+  workflow_dispatch:
+
+concurrency:
+  group: warm-cache
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  warm:
+    uses: yama6a/gha/.github/workflows/node-ci.yaml@v2
+    with:
+      warm-cache: true
